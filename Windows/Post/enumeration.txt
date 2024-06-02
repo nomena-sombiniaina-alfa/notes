@@ -1,0 +1,33 @@
+- system :
+    - global : sysinfo
+    - installed updates : wmic qfe get Caption,Description
+    - started services : net start
+    - installed apps : wmic product get name,version,vendor
+- users :
+    - current user 
+        - privileges : whoami /priv
+        - groups : whoami /group
+    - all 
+        - users : net user
+        - users in administrator group : net localgroup administrators
+        - groups 
+            - DC : net group
+            - other : net localgroup
+- networking : 
+    - all related to networking : ipconfig /all
+    - connexions : netstat -abno    
+    - current arp entries : arp -a
+
+downloadable gui tools :
+    - sysinternals : 
+        - link : https://docs.microsoft.com/en-us/sysinternals/downloads/
+        - usages :
+            - Process Explorer : Shows the processes along with the open files and registry keys
+            - Process Monitor : Monitor the file system, processes, and Registry
+            - PsList : Provides information about processes
+            - PsLoggedOn : Shows the logged-in users
+    - process hacker : 
+        - link : https://processhacker.sourceforge.io/
+        - usages : informations about processes and connexions 
+    - ghostpack seatbelt
+        - link : https://github.com/GhostPack/Seatbelt

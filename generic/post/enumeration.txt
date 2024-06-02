@@ -1,0 +1,18 @@
+- targets :
+    - Users and groups
+    - Hostnames
+    - Routing tables
+    - Network shares
+    - Network services
+    - Applications and banners
+    - Firewall configurations
+    - Service settings and audit configurations
+    - SNMP and DNS details
+    - Hunting for credentials (saved on web browsers or client applications)
+- dns : 
+    - zone transfer : dig -t axfr DOMAIN @IP
+- smb :
+    - list shares : net share
+- snmp :
+    - snmp logs : /opt/snmpcheck/snmpcheck.rb MACHINE_IP -c COMMUNITY_STRING
+    

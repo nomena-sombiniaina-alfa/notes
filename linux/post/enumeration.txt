@@ -1,0 +1,28 @@
+- basics : 
+    - distro : cat /etc/*-release
+    - hostname : hostname
+    - creds : 
+        - cat /etc/passwd 
+        - cat /etc/shadow 
+        - /etc/group
+    - emails : ls -lh /var/mail/
+    - installed binaries : 
+        - all :  cat /bin/* /usr/bin/* /usr/sbin/* /sbin/* /usr/local/bin/* /usr/local/sbin/*
+        - debian : dpkg -l
+        - rpm : rpm -qa
+    - users :
+        - all users : cat /etc/passwd
+        - logged in users : who
+        - logged in users and their action : w
+        - last logged in : last
+    - Networks :
+        - ip addresses : ip a s
+        - dns config : cat /etc/resolv.conf
+        - connexions :
+            - netstat : netstat -tuplen
+            - lsof : lsof -i 
+    - services :
+        - all services : pspy
+        - all current services : ps aux / ps axjf
+        
+        - 
