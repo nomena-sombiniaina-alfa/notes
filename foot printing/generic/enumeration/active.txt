@@ -1,0 +1,21 @@
+- zonetransfer : 
+    - dsnrecon -d DOMAIN -t axfr  
+
+- subdomain bruteforce :
+    - fierce --domain DOMAIN --subdomain-file SUBDOMAIN_FILE
+    - knockpy DOMAIN [-w SUBDOMAIN_FILE]
+    - nmap --script
+    - searchsploit
+    - nikto
+    - dirb/gobuster/dirbuster
+    - wfuzz/ffuf
+    - cmsmap
+    - wpscan
+
+- automated scan : 
+    - sniper :
+        - active : sniper -t DOMAIN
+        - passive : sniper -t DOMAIN -m stealth -o -re
+    - amass :
+        - enumeration : amas enum -d DOMAIN
+    - recon-ng

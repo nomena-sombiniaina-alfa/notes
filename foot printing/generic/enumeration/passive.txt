@@ -1,0 +1,35 @@
+- identify address : 
+    - host DOMAIN
+    - nslookup DOMAIN
+    - traceroute DOMAIN
+
+- dns info :
+    - dnsrecon -d DOMAIN
+    - dig DOMAIN
+    - dig DNS_SERVER DOMAIN
+     
+- firewall detection : 
+    - wafw00f DOMAIN
+
+- whois : 
+    - syntax : whois DOMAIN/IP
+
+- website : 
+    - netcraft.com
+    - dnsdumpster.com
+
+- web technology :
+    - whatweb DOMAIN
+
+- web technology plugin :
+    - wappalizer
+    - builtwith
+
+- OSINT : 
+    - theHarverster -d DOMAIN -b google[,bing,yahoo,...]
+
+- subdomain enumeration:
+    - sublist3r -d DOMAIN
+    - google : site:*.DOMAIN -site:www.DOMAIN
+
+ 
